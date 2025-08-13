@@ -59,7 +59,7 @@ async def load_model():
     
     try:
         # Load model
-        model_path = Path("models/baseline_model.pkl")
+        model_path = Path("models/taxi_duration_model.pkl")
         if model_path.exists():
             model_trainer = ModelTrainer.load_model(model_path)
             print(f"Model loaded from {model_path}")
@@ -67,10 +67,11 @@ async def load_model():
             print(f"Warning: Model not found at {model_path}")
         
         # Load feature names
-        features_path = Path("models/feature_names.pkl")
+        features_path = Path("models/feature_names.json")
         if features_path.exists():
-            with open(features_path, "rb") as f:
-                feature_names = pickle.load(f)
+            import json
+            with open(features_path, "r") as f:
+                feature_names = json.load(f)
             print(f"Feature names loaded: {len(feature_names)} features")
         
         # Initialize data processor
