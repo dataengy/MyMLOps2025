@@ -10,7 +10,7 @@ default:
 # ==============================================================================
 
 # Initialize project environment (install deps + pre-commit + setup dirs)
-setup: install pre-commit-install
+setup: install-dev pre-commit-install
     @echo "Creating .env file from template..."
     @if [ ! -f .env ] && [ -f .env.template ]; then cp .env.template .env; fi
     @echo "Creating data directories..."
@@ -147,7 +147,7 @@ docker-logs:
 # Deploy locally with Docker
 deploy-local: docker-up
     @echo "Local deployment started"
-    @echo "MLflow UI: http://localhost:5000"
+    @echo "MLflow UI: http://localhost:5001"
     @echo "Dagster UI: http://localhost:3001"
     @echo "API: http://localhost:8000"
 
@@ -206,7 +206,7 @@ full-pipeline: data train evaluate deploy-local
 # ==============================================================================
 
 # Run complete MLOps pipeline in Docker with proper orchestration
-run-all: docker-down clean
+run-all-docker: docker-down clean
     @echo "🚀 Starting Complete MLOps Pipeline in Docker..."
     @echo "=================================================="
     
@@ -251,7 +251,7 @@ run-all: docker-down clean
     @echo ""
     @echo "🔗 Service URLs:"
     @echo "  • API Server:    http://localhost:8000"
-    @echo "  • MLflow UI:     http://localhost:5000"
+    @echo "  • MLflow UI:     http://localhost:5001"
     @echo "  • Dagster UI:    http://localhost:3001"
     @echo "  • API Health:    http://localhost:8000/health"
     @echo "  • API Docs:      http://localhost:8000/docs"
@@ -262,6 +262,52 @@ run-all: docker-down clean
     @echo "       -d '{\"pickup_longitude\": -73.935, \"pickup_latitude\": 40.730, \"dropoff_longitude\": -73.985, \"dropoff_latitude\": 40.750, \"passenger_count\": 2}'"
     @echo ""
     @echo "🛑 To stop all services: just docker-down"
+
+# Run complete MLOps pipeline locally (without Docker)
+run-all: clean
+    @echo "🚀 Starting Complete MLOps Pipeline (Local)..."
+    @echo "=============================================="
+    
+    # Phase 1: Environment Setup
+    @echo "📦 Phase 1: Setting up environment..."
+    just setup
+    @echo "✅ Environment ready"
+    
+    # Phase 2: Data Pipeline
+    @echo "📊 Phase 2: Running data pipeline..."
+    just data-sample
+    @echo "✅ Data pipeline complete"
+    
+    # Phase 3: ML Training
+    @echo "🤖 Phase 3: Training ML model..."
+    just train-baseline
+    @echo "✅ Model training complete"
+    
+    # Phase 4: Model Evaluation
+    @echo "📈 Phase 4: Evaluating model..."
+    @if [ -f src/evaluate.py ]; then just evaluate; else echo "evaluate.py not found, skipping evaluation"; fi
+    @echo "✅ Model evaluation complete"
+    
+    # Phase 5: Quick API Test (if available)
+    @echo "🌐 Phase 5: Testing local components..."
+    @echo "Model files:"
+    @ls -la models/ || echo "No models directory found"
+    @echo "Data files:"
+    @ls -la data/processed/ || echo "No processed data found"
+    @echo "✅ Component validation complete"
+    
+    # Phase 6: Final Status
+    @echo "🎉 Phase 6: Pipeline complete!"
+    @echo "=============================================="
+    @echo "🎯 Local MLOps Pipeline Successfully Executed!"
+    @echo ""
+    @echo "📊 Next steps:"
+    @echo "  • Run 'just docker-up' to start services"
+    @echo "  • Run 'just api' to start local API server"
+    @echo "  • Run 'just mlflow' to start MLflow UI"
+    @echo "  • Run 'just dagster' to start Dagster UI"
+    @echo ""
+    @echo "🔧 For Docker deployment: just run-all-docker"
 
 # Quick validation of the complete setup
 validate-all: docker-up

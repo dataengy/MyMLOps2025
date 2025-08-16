@@ -1,4 +1,4 @@
-version: '3.8'
+# Removed obsolete version attribute
 
 services:
   # PostgreSQL for MLflow and metadata
@@ -13,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 30s
@@ -36,7 +36,7 @@ services:
       - mlflow_artifacts:/mlflow/artifacts
       - ./models:/app/models
     ports:
-      - "5000:5000"
+      - "5001:5000"
     command: >
       mlflow server 
       --backend-store-uri postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-nytaxi_mlops}
@@ -93,7 +93,7 @@ services:
     ports:
       - "3001:3001"
     command: >
-      dagster dev 
+      uv run dagster dev 
       --host 0.0.0.0 
       --port 3001
       -f /app/src/dagster_app.py
