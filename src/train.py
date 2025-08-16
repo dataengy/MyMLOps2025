@@ -16,6 +16,10 @@ from dotenv import load_dotenv
 from data.data_processor import TaxiDataProcessor
 from models.trainer import ModelTrainer
 
+##?
+DEFAULT_DATA_PATH = "data/processed/processed_data.parquet"
+# DEFAULT_DATA_PATH = "data/processed/processed_taxi_data.csv"
+
 # Load environment variables
 load_dotenv()
 console = Console()
@@ -165,8 +169,8 @@ def main():
     )
     parser.add_argument(
         "--data", 
-        type=Path, 
-        default=Path("data/processed/processed_data.parquet"),
+        type=Path,
+        default=Path(DEFAULT_DATA_PATH),
         help="Path to processed data"
     )
     parser.add_argument(
