@@ -106,7 +106,7 @@ quick-train: data-sample train-baseline
 
 # Start Dagster development server
 dagster:
-    uv run dagster dev -f src/dagster_app.py
+    uv run dagster dev -m src.dagster_app
 
 # Start MLflow UI server
 mlflow:

@@ -75,7 +75,7 @@ evaluate:
 
 # Services
 dagster:
-	uv run dagster dev -f src/dagster_app.py
+	uv run dagster dev -m src.dagster_app
 
 mlflow:
 	uv run mlflow ui --host 0.0.0.0 --port 5000

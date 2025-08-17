@@ -3,7 +3,7 @@ Main Dagster application module.
 """
 
 from dagster import Definitions
-from .dagster_app.assets import (
+from dagster_app.assets import (
     raw_taxi_data,
     cleaned_taxi_data,
     feature_engineered_data,
