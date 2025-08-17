@@ -1,19 +1,20 @@
 # Current Project Status - MLOps NYTaxi
 
-## ✅ **JUSTFILE CREATED & TESTED - PIPELINE OPERATIONAL**
+## 🎉 **DOCKER PIPELINE DEBUGGED & FULLY OPERATIONAL**
 
 ### Last 3 Finished Tasks
-1. **Justfile Creation** - Complete justfile with all Makefile commands plus `run-all` orchestration
-2. **Local Pipeline Validation** - `just run-all` successfully executes: setup → data → train → validate
-3. **Docker Commands Setup** - `run-all-docker` for Docker orchestration, `run-all` for local execution
+1. **Docker Port Conflicts Resolved** - Fixed PostgreSQL (5433), MLflow (5001), avoided ControlCenter conflicts
+2. **Dagster Container Fixed** - Updated command to use `uv run dagster dev` instead of `dagster`
+3. **Full Docker Stack Validated** - All 5 services running healthy: API, MLflow, Dagster, PostgreSQL, Monitoring
 
-### Current Status  
-- ✅ **Justfile Commands**: Complete command suite with `just --list` showing all available actions
-- ✅ **Local Pipeline**: `just run-all` executes full MLOps workflow (setup → data → train → validate)
-- ✅ **Model Training**: Baseline model achieves R² = 0.8021 (RMSE: 335.76) with 8.4M samples
-- ✅ **API Service**: FastAPI launches successfully with `/health` and `/docs` endpoints operational
-- ✅ **Docker Setup**: `just run-all-docker` available for containerized deployment
-- ✅ **Development Tools**: All quality checks, testing, and monitoring commands functional
+### Current Docker Services Status
+- ✅ **API Server**: http://localhost:8000 (healthy) - Model loaded and ready for predictions
+- ✅ **MLflow UI**: http://localhost:5001 (healthy) - Experiment tracking and model registry  
+- ✅ **Dagster UI**: http://localhost:3001 (healthy) - Pipeline orchestration and scheduling
+- ✅ **PostgreSQL**: localhost:5433 (healthy) - Database for MLflow and metadata
+- ✅ **Monitoring**: http://localhost:8001 (healthy) - Data drift detection dashboard
+- ✅ **Complete Pipeline**: `just run-all-docker` successfully executes all phases
+- ✅ **Local Alternative**: `just run-all` for non-containerized development
 
 ## Current Project Maturity: **PRODUCTION READY** 🚀
 

@@ -37,6 +37,15 @@ class TripRequest(BaseModel):
     fare_amount: float = Field(..., gt=0, le=1000, description="Fare amount")
 
 
+class SimpleTripRequest(BaseModel):
+    """Simplified request model requiring only essential fields."""
+    trip_distance: float = Field(..., gt=0, le=100, description="Trip distance in miles")
+    passenger_count: int = Field(1, ge=1, le=8, description="Number of passengers")
+    pickup_hour: int = Field(12, ge=0, le=23, description="Hour of pickup (0-23), defaults to noon")
+    PULocationID: int = Field(142, ge=1, le=265, description="Pickup location ID, defaults to Manhattan")
+    DOLocationID: int = Field(236, ge=1, le=265, description="Dropoff location ID, defaults to Manhattan")
+
+
 class TripResponse(BaseModel):
     """Response model for trip duration prediction."""
     predicted_duration: float = Field(..., description="Predicted trip duration in seconds")
@@ -149,6 +158,60 @@ async def predict_trip_duration(trip: TripRequest):
             predicted_duration=float(prediction),
             predicted_duration_minutes=float(prediction / 60),
             model_version="baseline_v1",
+            timestamp=datetime.now().isoformat()
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
+
+
+@app.post("/predict/simple", response_model=TripResponse)
+async def predict_simple(trip: SimpleTripRequest):
+    """Simplified prediction endpoint requiring only essential fields."""
+    
+    if model_trainer is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    
+    try:
+        # Create a synthetic datetime for the given hour
+        pickup_datetime = f"2024-01-15 {trip.pickup_hour:02d}:30:00"
+        
+        # Convert to full trip request with estimated defaults
+        trip_data = {
+            "tpep_pickup_datetime": [pickup_datetime],
+            "trip_distance": [trip.trip_distance],
+            "passenger_count": [trip.passenger_count],
+            "PULocationID": [trip.PULocationID],
+            "DOLocationID": [trip.DOLocationID],
+            "fare_amount": [trip.trip_distance * 3.0 + 5.0],  # Estimate: $3/mile + $5 base
+        }
+        
+        df = pd.DataFrame(trip_data)
+        df["tpep_pickup_datetime"] = pd.to_datetime(df["tpep_pickup_datetime"])
+        
+        # Add dummy values for required fields
+        df["tpep_dropoff_datetime"] = df["tpep_pickup_datetime"]
+        df["trip_duration"] = 600  # Dummy value
+        
+        # Process features
+        df = data_processor.engineer_features(df)
+        X, _, _ = data_processor.prepare_model_data(df)
+        
+        # Ensure we have all required features
+        if feature_names:
+            missing_features = set(feature_names) - set(X.columns)
+            if missing_features:
+                for feature in missing_features:
+                    X[feature] = 0
+            X = X[feature_names]
+        
+        # Make prediction
+        prediction = model_trainer.predict(X)[0]
+        
+        return TripResponse(
+            predicted_duration=float(prediction),
+            predicted_duration_minutes=float(prediction / 60),
+            model_version="random_forest_v1",
             timestamp=datetime.now().isoformat()
         )
         
